@@ -1,0 +1,14 @@
+# Compiled Python files
+__pycache__/
+*.pyc
+*.pyo
+
+# Generated logs, models, and evaluation outputs
+output/
+training_outputs/
+
+# Environment files
+.env
+
+project_data/stock_prices.csv
+project_data/benchmark_data.csv
