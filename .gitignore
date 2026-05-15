@@ -1,14 +1,17 @@
-# Compiled Python files
+# Python caches
 __pycache__/
 *.pyc
-*.pyo
 
-# Generated logs, models, and evaluation outputs
-output/
+# Virtual environments
+venv/
+env/
+/opt/venv/
+
+# Project Data and Models (Too large for GitHub, generated locally)
+project_data/
 training_outputs/
+*.csv
+*.zip
 
-# Environment files
-.env
-
-project_data/stock_prices.csv
-project_data/benchmark_data.csv
+# OS Files
+.DS_Store

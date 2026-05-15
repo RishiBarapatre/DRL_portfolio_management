@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  # Service 1: The Live Analytics UI
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: drl-portfolio-app:latest
+    container_name: drl_dashboard
+    ports:
+      - "8501:8501"
+    volumes:
+      # Map internal outputs to local folders to retain model checkpoints and downloaded CSVs
+      - ./project_data:/usr/src/app/project_data
+      - ./training_outputs:/usr/src/app/training_outputs
+    restart: unless-stopped
+    environment:
+      - STREAMLIT_SERVER_MAX_UPLOAD_SIZE=50
+
+  # Service 2: Ephemeral Background ML Training Task
+  trainer:
+    image: drl-portfolio-app:latest
+    container_name: drl_trainer
+    # Override the default CMD to execute the deep reinforcement learning pipeline
+    command: ["python", "train.py"]
+    volumes:
+      - ./project_data:/usr/src/app/project_data
+      - ./training_outputs:/usr/src/app/training_outputs
+    # Run interactive tasks cleanly without auto-rebooting when training finishes
+    restart: "no"

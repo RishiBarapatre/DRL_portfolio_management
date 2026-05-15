@@ -1,0 +1,31 @@
+# Version control
+.git
+.gitignore
+
+# Virtual environments
+miniconda3/
+envs/
+.conda/
+venv/
+env/
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Local training outputs and logs
+training_outputs/
+project_data/
+output/
+*.zip
+*.csv
+*.pdf
+*.png
+
+# IDEs and local configs
+.vscode/
+.idea/
+.DS_Store

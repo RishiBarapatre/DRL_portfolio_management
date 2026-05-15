@@ -1,0 +1,21 @@
+# Core Data Science & Utilities
+numpy==1.26.4
+pandas==2.3.3
+scikit-learn==1.7.2
+
+# Deep Reinforcement Learning
+stable-baselines3==2.7.0
+gym==0.26.2
+gymnasium==1.2.1
+shimmy==2.0.0
+tensorboard==2.20.0
+
+# Visualization & UI
+matplotlib==3.10.7
+seaborn==0.13.2
+plotly
+streamlit
+
+# Financial Market Data
+yfinance
+requests-cache
