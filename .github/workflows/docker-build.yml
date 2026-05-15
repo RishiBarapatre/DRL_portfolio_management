@@ -15,7 +15,7 @@ jobs:
     steps:
     # Step 1: Download your code onto the GitHub server
     - name: Checkout Code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     # Step 2: Run the exact command you run locally to prove it works anywhere
     - name: Test Docker Compose Build
