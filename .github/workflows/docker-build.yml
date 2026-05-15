@@ -1,0 +1,22 @@
+name: Docker CI Build Test
+
+# Tell GitHub to run this script every time you push to the 'main' branch
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    # GitHub will give us a free, blank Linux server to run this on
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Download your code onto the GitHub server
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    # Step 2: Run the exact command you run locally to prove it works anywhere
+    - name: Test Docker Compose Build
+      run: docker compose build --no-cache
