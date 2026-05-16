@@ -55,6 +55,14 @@ def run_evaluation():
     
     price_cols = TICKERS
     signal_cols = [col for col in test_df.columns if col not in price_cols]
+
+    print("Loading test data...")
+    test_df = pd.read_csv(TEST_DATA_PATH, index_col='Date', parse_dates=True)
+    
+    print("--- VERIFYING DATA LENGTH ---")
+    print("Row count in test file:", len(test_df))
+    print("Date range of test file:", test_df.index.min(), "to", test_df.index.max())
+    print("-----------------------------")
     
     test_env = PortfolioEnv(
         data_df=test_df, 
@@ -64,6 +72,12 @@ def run_evaluation():
         start_date_index=WINDOW_LENGTH-1,
         steps=len(test_df) - WINDOW_LENGTH - 1
     )
+
+    print("--- DIAGNOSTIC CHECK ---")
+    print("WINDOW_LENGTH variable is:", WINDOW_LENGTH)
+    print("test_df shape is:", test_df.shape)
+    print("Initial observation shape from env reset is:", test_env.reset()[0].shape)
+    print("------------------------")
 
     print("Running evaluation backtest...")
     obs, _ = test_env.reset()

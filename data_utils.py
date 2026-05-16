@@ -25,7 +25,7 @@ def download_stock_data():
     """
     if os.path.exists(RAW_DATA_PATH):
         print(f"Loading stock data from local cache: {RAW_DATA_PATH}")
-        return pd.read_csv(RAW_DATA_PATH, index_col='Date', parse_dates=True)
+        return pd.read_csv(RAW_DATA_PATH, index_col=0, parse_dates=True)
     
     print("Starting batched download for all 50 tickers...")
     
@@ -73,33 +73,34 @@ def download_stock_data():
 
 def download_benchmark_data():
     """
-    Downloads and caches the Nifty 50 Index data.
-    Waits 60 seconds *before* downloading to be safe.
+    Robustly parses multi-row headers from yfinance benchmark data.
     """
-    if os.path.exists(BENCHMARK_PATH):
-        print(f"Loading benchmark data from local cache: {BENCHMARK_PATH}")
-        return pd.read_csv(BENCHMARK_PATH, index_col='Date', parse_dates=True)
-    
-    print("Waiting 60 seconds before downloading benchmark to be safe...")
-    time.sleep(60)
-    
-    print(f"Downloading benchmark ticker {BENCHMARK_TICKER}...")
     try:
-        data = yf.download(BENCHMARK_TICKER, start=START_DATE, end=END_DATE)
-        if data.empty: raise Exception("No data returned for benchmark.")
+        print(f"Loading benchmark data from file: {BENCHMARK_PATH}...")
         
-        if 'Adj Close' in data.columns:
-            benchmark_data = data[['Adj Close']]
-        else:
-            benchmark_data = data[['Close']]
-            
-        benchmark_data.to_csv(BENCHMARK_PATH)
-        print(f"Benchmark data saved successfully to '{BENCHMARK_PATH}'")
+        # Read the CSV, skipping the first two metadata rows, and use the 0th column (Date) as index
+        benchmark_data = pd.read_csv(BENCHMARK_PATH, skiprows=2, index_col=0, parse_dates=True)
+        
+        # Clean up index name and column naming
+        benchmark_data.index.name = 'Date'
+        benchmark_data.columns = ['Close']
+        
         return benchmark_data
-        
     except Exception as e:
-        print(f"ERROR downloading benchmark data: {e}")
-        return pd.DataFrame()
+        print(f"Failed parsing file ({e}). Downloading fresh benchmark data...")
+        try:
+            import yfinance as yf
+            benchmark_data = yf.download(BENCHMARK_TICKER, start=START_DATE, end=END_DATE)
+            if 'Adj Close' in benchmark_data.columns:
+                benchmark_prices = benchmark_data[['Adj Close']]
+            else:
+                benchmark_prices = benchmark_data[['Close']]
+            
+            benchmark_prices.to_csv(BENCHMARK_PATH)
+            return benchmark_prices
+        except Exception as download_error:
+            print(f"Failed to download benchmark: {download_error}")
+            return None
 
 def create_features(all_data):
     print("Calculating technical indicators...")
@@ -136,7 +137,16 @@ def process_and_save_data():
     signals_df = create_features(all_data)
     
     final_df = all_data.join(signals_df)
+    final_df.sort_index(inplace=True)
+    
+    # --- ADD THIS DATA-PRESERVING SAFEGUARD ---
+    # 1. Forward-fill gaps (handles holidays, weekends, and short halts)
+    final_df.ffill(inplace=True)
+    # 2. Backward-fill gaps (handles assets that weren't listed yet in 2014)
+    final_df.bfill(inplace=True)
+    # 3. Drop any remaining pure NaN rows if they exist
     final_df.dropna(inplace=True)
+    # ------------------------------------------
     
     train_size = int(len(final_df) * TRAIN_TEST_SPLIT)
     train_df = final_df.iloc[:train_size].copy()

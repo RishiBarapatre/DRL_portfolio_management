@@ -15,6 +15,16 @@ def run_training():
         
     print("Loading training data...")
     train_df = pd.read_csv(TRAIN_DATA_PATH, index_col='Date', parse_dates=True)
+
+    # Find your data loading line, which looks something like this:
+    # train_df = pd.read_csv(TRAIN_DATA_PATH, index_col='Date', parse_dates=True)
+    
+    print("\n" + "="*40)
+    print("🧠 DATA VERIFICATION CHECK")
+    print("="*40)
+    print(f"Total trading days loaded: {len(train_df)}")
+    print(f"Date timeline: {train_df.index.min().date()} TO {train_df.index.max().date()}")
+    print("="*40 + "\n")
     
     price_cols = TICKERS
     signal_cols = [col for col in train_df.columns if col not in price_cols]
